@@ -8,55 +8,60 @@ import (
 	_ "net/http"
 	"os"
 	_ "os"
+	"regexp"
+	_ "regexp"
 	"strings"
 )
 
 var file *os.File
 
 func main() {
-	urlStr, err := ioutil.ReadFile("url.txt")
+
+	var reg = regexp.MustCompile(`[[:space:]]`)
+	var name = regexp.MustCompile(`[[:punct:]]|[["https"]|[["www"]`)
+
+	fmt.Print("Введите расположение файлов к url адресам или 1  = ")
+	var urlPath, resultPath string
+	fmt.Fscan(os.Stdin, &urlPath)
+	if urlPath == "1" {
+		urlPath = "C:/Users/Admin/Desktop/url.txt"
+	}
+	urlStr, err := ioutil.ReadFile(urlPath)
 	if err != nil {
 		fmt.Println("err")
 	}
+	fmt.Print("Введите расположение папки результатов или 1  = ")
+	fmt.Fscan(os.Stdin, &resultPath)
+	if resultPath == "1" {
+		resultPath = "C:/Users/Admin/Desktop/result/"
+	}
 	str := string(urlStr)
-	fmt.Println(str)
+
 	for i := 0; i < len(string(str)); i++ {
-
 		urllines := strings.Split(string(str), "\n")
-		println("line №", i, " = ", urllines[i])
+		println("line №", i, "1", urllines[i])
+
+		urllines[i] = reg.ReplaceAllString(urllines[i], "")
+		nameFile := name.ReplaceAllString(urllines[i], "")
+
+		fmt.Println("name file = ", nameFile)
+
+		file, err := os.Create(resultPath + nameFile + ".html")
+		if err != nil {
+			fmt.Println("can't create file", err)
+			os.Exit(1)
+		}
+		resp, err := http.Get(urllines[i])
+		if err != nil {
+			fmt.Println("урл не работает")
+			fmt.Println(err)
+			return
+		}
+		getHtml(resp, file)
+		defer file.Close()
+
 	}
-
-	//urlFile, err := os.Open("url.txt")
-	//if err!=nil{
-	//	fmt.Println(err)
-	//	os.Exit(2);
-	//}
-	//defer urlFile.Close()
-	//stat,err:=urlFile.Stat()
-	//if err!=nil {
-	//	return
-	//}
-	//
-	//data:=make([]byte,stat.Size())
-	//
-	//strUrl := string(data);
-	//fmt.Println("str url = ",strUrl)
-
-	resp, err := http.Get("https://www.google.com")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	file, err := os.Create("first")
-	if err != nil {
-		fmt.Println("can't create file", err)
-		os.Exit(1)
-	}
-
-	defer file.Close()
-
-	getHtml(resp, file)
+	fmt.Println("urllines = ", urllines[1])
 
 }
 
