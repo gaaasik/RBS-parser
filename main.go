@@ -17,62 +17,63 @@ var file *os.File
 
 func main() {
 
-	var reg = regexp.MustCompile(`[[:space:]]`)
-	var name = regexp.MustCompile(`[[:punct:]]|[["https"]|[["www"]`)
+	var delSpase = regexp.MustCompile(`[[:space:]]`) //это для того чтобы убрать из url лишние символы
+	var delPunct = regexp.MustCompile(`[[:punct:]]`) // и сделать имя файла более приличным
 
-	fmt.Print("Введите расположение файлов к url адресам или 1  = ")
+	fmt.Print("Введите расположение файла с url адресами = ")
 	var urlPath, resultPath string
 	fmt.Fscan(os.Stdin, &urlPath)
-	if urlPath == "1" {
-		urlPath = "C:/Users/Admin/Desktop/url.txt"
-	}
+
+	//if urlPath == "1" {		//это мне надо было для быстрой проверки программы
+	//	urlPath = "C:/Users/Admin/Desktop/url.txt"
+	//}
+
 	urlStr, err := ioutil.ReadFile(urlPath)
 	if err != nil {
-		fmt.Println("err")
+		fmt.Println("неверное расположение файла с url")
 	}
-	fmt.Print("Введите расположение папки результатов или 1  = ")
+	fmt.Print("Введите расположение папки результатов  = ")
 	fmt.Fscan(os.Stdin, &resultPath)
-	if resultPath == "1" {
-		resultPath = "C:/Users/Admin/Desktop/result/"
-	}
+
+	//if resultPath == "1" {
+	//	resultPath = "C:/Users/Admin/Desktop/result/"
+	//}
+
 	str := string(urlStr)
 
-	for i := 0; i < len(string(str)); i++ {
-		urllines := strings.Split(string(str), "\n")
-		println("line №", i, "1", urllines[i])
+	urllines := strings.Split(string(str), "\n") // разделяем содержимое файла на строки, одна строка одна ссылка
 
-		urllines[i] = reg.ReplaceAllString(urllines[i], "")
-		nameFile := name.ReplaceAllString(urllines[i], "")
+	for index, _ := range urllines {
+		urllines[index] = delSpase.ReplaceAllString(urllines[index], "") //убираем пробелы
+		nameFile := delPunct.ReplaceAllString(urllines[index], "")       //убираем пунктуацию и слэши
+		nameFile = strings.Replace(nameFile, "https", "", -1)            // убираем hhtps www
+		nameFile = strings.Replace(nameFile, "www", "", -1)
+		fmt.Println("name file = ", nameFile) // просто печатем
 
-		fmt.Println("name file = ", nameFile)
-
-		file, err := os.Create(resultPath + nameFile + ".html")
-		if err != nil {
+		file, err := os.Create(resultPath + nameFile + ".html") // создаем файл resultPath -директория в которую запишется файk
+		if err != nil {                                         // и добавляем расширение html
 			fmt.Println("can't create file", err)
 			os.Exit(1)
 		}
-		resp, err := http.Get(urllines[i])
+		resp, err := http.Get(urllines[index]) // делаем urllines[i] ссылкой
 		if err != nil {
-			fmt.Println("урл не работает")
+			fmt.Println("неверный url адрес")
 			fmt.Println(err)
 			return
 		}
-		getHtml(resp, file)
+		getHtml(resp, file) //вызов функции resp - ссылка ; file - наш созданный файл
 		defer file.Close()
-
 	}
-	fmt.Println("urllines = ", urllines[1])
-
 }
 
-func getHtml(res *http.Response, file2 *os.File) {
+func getHtml(res *http.Response, file2 *os.File) { // эта функция получает ссылку и файл
 	defer res.Body.Close()
 
 	for true {
 
-		bs := make([]byte, 1014)
+		bs := make([]byte, 1014) // получаем посимвольно содержимое html документа
 		n, err := res.Body.Read(bs)
-		file2.WriteString(string(bs[:n]))
+		file2.WriteString(string(bs[:n])) //записываем это все в файл
 
 		if n == 0 || err != nil {
 			break
