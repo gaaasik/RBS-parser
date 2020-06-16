@@ -20,9 +20,12 @@ func main() {
 	var delSpase = regexp.MustCompile(`[[:space:]]`) //это для того чтобы убрать из url лишние символы
 	var delPunct = regexp.MustCompile(`[[:punct:]]`) // и сделать имя файла более приличным
 
-	fmt.Print("Введите расположение файла с url адресами = ")
-	var urlPath, resultPath string
-	fmt.Fscan(os.Stdin, &urlPath)
+	if len(os.Args) != 3 {
+		fmt.Print("не получилось", os.Args[0])
+		os.Exit(1)
+	}
+	urlPath := os.Args[1]
+	resultPath := os.Args[2]
 
 	//if urlPath == "1" {		//это мне надо было для быстрой проверки программы
 	//	urlPath = "C:/Users/Admin/Desktop/url.txt"
@@ -32,8 +35,6 @@ func main() {
 	if err != nil {
 		fmt.Println("неверное расположение файла с url")
 	}
-	fmt.Print("Введите расположение папки результатов  = ")
-	fmt.Fscan(os.Stdin, &resultPath)
 
 	//if resultPath == "1" {
 	//	resultPath = "C:/Users/Admin/Desktop/result/"
@@ -64,6 +65,7 @@ func main() {
 		getHtml(resp, file) //вызов функции resp - ссылка ; file - наш созданный файл
 		defer file.Close()
 	}
+
 }
 
 func getHtml(res *http.Response, file2 *os.File) { // эта функция получает ссылку и файл
