@@ -1,15 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	_ "io"
 	"io/ioutil"
+	"log"
 	"net/http"
-	_ "net/http"
 	"os"
-	_ "os"
 	"regexp"
-	_ "regexp"
 	"strings"
 )
 
@@ -24,16 +22,22 @@ func main() {
 		fmt.Print("не получилось", os.Args[0])
 		os.Exit(1)
 	}
-	urlPath := os.Args[1]
-	resultPath := os.Args[2]
+	urlPath := flag.String("url", "none", "string")
+	resultPath := flag.String("resultPath", "none", "string")
+	flag.Parse()
+
+	os.Mkdir(*resultPath, os.ModePerm)
 
 	//if urlPath == "1" {		//это мне надо было для быстрой проверки программы
 	//	urlPath = "C:/Users/Admin/Desktop/url.txt"
 	//}
 
-	urlStr, err := ioutil.ReadFile(urlPath)
-	if err != nil {
-		fmt.Println("неверное расположение файла с url")
+	urlStr, err := ioutil.ReadFile(*urlPath)
+	if (err != nil) || (*urlPath == "none") {
+		fmt.Println("неверное расположение файла с url") /////////////////////////////////
+		log.Fatal(err)
+		//res:="ошибка чтения файла";
+
 	}
 
 	//if resultPath == "1" {
@@ -51,11 +55,6 @@ func main() {
 		nameFile = strings.Replace(nameFile, "www", "", -1)
 		fmt.Println("name file = ", nameFile) // просто печатем
 
-		file, err := os.Create(resultPath + nameFile + ".html") // создаем файл resultPath -директория в которую запишется файk
-		if err != nil {                                         // и добавляем расширение html
-			fmt.Println("can't create file", err)
-			os.Exit(1)
-		}
 		resp, err := http.Get(urllines[index]) // делаем urllines[i] ссылкой
 		if err != nil {
 			fmt.Println("неверный url адрес")
@@ -63,7 +62,7 @@ func main() {
 			return
 		}
 		getHtml(resp, file) //вызов функции resp - ссылка ; file - наш созданный файл
-		defer file.Close()
+
 	}
 
 }
