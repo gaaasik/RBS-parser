@@ -55,6 +55,13 @@ func main() {
 		nameFile = strings.Replace(nameFile, "www", "", -1)
 		fmt.Println("name file = ", nameFile) // просто печатем
 
+		file, err := os.Create(*resultPath + nameFile + ".html") // создаем файл resultPath -директория в которую запишется файk
+		defer file.Close()
+		if (err != nil) || (*resultPath == "none") { // и добавляем расширение html
+			fmt.Println("can't create file", err)
+			os.Exit(1)
+		}
+
 		resp, err := http.Get(urllines[index]) // делаем urllines[i] ссылкой
 		if err != nil {
 			fmt.Println("неверный url адрес")
