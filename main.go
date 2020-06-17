@@ -9,11 +9,13 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 var file *os.File
 
 func main() {
+	t0 := time.Now()
 
 	var delSpase = regexp.MustCompile(`[[:space:]]`) //это для того чтобы убрать из url лишние символы
 	var delPunct = regexp.MustCompile(`[[:punct:]]`) // и сделать имя файла более приличным
@@ -68,10 +70,11 @@ func main() {
 			fmt.Println(err)
 			return
 		}
-		getHtml(resp, file) //вызов функции resp - ссылка ; file - наш созданный файл
+		go getHtml(resp, file) //вызов функции resp - ссылка ; file - наш созданный файл go-
 
 	}
-
+	t1 := time.Now()
+	fmt.Println("Время выполнения = ", t1.Sub(t0))
 }
 
 func getHtml(res *http.Response, file2 *os.File) { // эта функция получает ссылку и файл
