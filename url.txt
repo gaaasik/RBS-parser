@@ -7,8 +7,5 @@ https://www.kaggle.com/notebooks
 https://go-tour-ru-ru.appspot.com/methods/26
 https://golang.org/pkg/os/
 https://golang.org/pkg/os/#FileMode
-https://www.matools.com/lang-ru/blog/190372039
 https://github.com/gaaasik/RBS-parser/blob/master/main.go
-https://gobyexample.com/reading-files
-https://gobyexample.ru/command-line-flags.html
-https://gobyexample.ru/defer.html
+https://gobyexample.com/
