@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"flag"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -20,21 +20,21 @@ func main() {
 	var delSpase = regexp.MustCompile(`[[:space:]]`) //это для того чтобы убрать из url лишние символы
 	var delPunct = regexp.MustCompile(`[[:punct:]]`) // и сделать имя файла более приличным
 
-	//if len(os.Args) != 3 {
-	//	fmt.Print("не получилось", os.Args[0])
-	//	os.Exit(1)
-	//}
-	//urlPath := flag.String("url", "none", "string")
-	//resultPath := flag.String("resultPath", "none", "string")
-	//flag.Parse()
+	if len(os.Args) != 3 {
+		fmt.Print("не получилось", os.Args[0])
+		os.Exit(1)
+	}
+	urlPath := flag.String("url", "none", "string")
+	resultPath := flag.String("resultPath", "none", "string")
+	flag.Parse()
 
-	urlPath := "./url.txt"
-	resultPath := "./datafiles/result/"
+	//urlPath := "./url.txt" // проверка в голанд
+	//resultPath := "./datafiles/result/"
 
-	os.Mkdir(resultPath, os.ModePerm)
+	os.Mkdir(*resultPath, os.ModePerm)
 
-	urlStr, err := ioutil.ReadFile(urlPath)
-	if (err != nil) || (urlPath == "none") {
+	urlStr, err := ioutil.ReadFile(*urlPath)
+	if (err != nil) || (*urlPath == "none") {
 		fmt.Println("неверное расположение файла с url") /////////////////////////////////
 		log.Fatal(err)
 
@@ -46,14 +46,15 @@ func main() {
 
 	for index, _ := range urllines {
 		urllines[index] = delSpase.ReplaceAllString(urllines[index], "") //убираем пробелы
-		nameFile := delPunct.ReplaceAllString(urllines[index], "")       //убираем пунктуацию и слэши
-		nameFile = strings.Replace(nameFile, "https", "", -1)            // убираем hhtps www
+
+		nameFile := delPunct.ReplaceAllString(urllines[index], "") //убираем пунктуацию и слэши
+		nameFile = strings.Replace(nameFile, "https", "", -1)      // убираем hhtps www
+		nameFile = strings.Replace(nameFile, "http", "", -1)
 		nameFile = strings.Replace(nameFile, "www", "", -1)
 		//fmt.Println("name file = ", nameFile) // просто печатем
-		go getHtml(nameFile, resultPath, urllines, index) //вызов функции resp - ссылка ; file - наш созданный файл go-
+		go getHtml(nameFile, *resultPath, urllines, index) //вызов функции resp - ссылка ; file - наш созданный файл go-
 
-		time.Sleep(500 * time.Millisecond)
-		fmt.Println("println")
+		time.Sleep(130 * time.Millisecond)
 	}
 
 	t1 := time.Now()
@@ -62,7 +63,7 @@ func main() {
 
 func getHtml(name string, resultP string, urlL []string, i int) { // эта функция получает ссылку и файл
 
-	fmt.Println("gethtml  ", name)
+	fmt.Println(i, name)
 	//	time.Sleep(100 * time.Millisecond);
 	file, err := os.Create(resultP + name + ".html") // создаем файл resultPath -директория в которую запишется файk
 	if (err != nil) || (resultP == "none") {         // и добавляем расширение html
