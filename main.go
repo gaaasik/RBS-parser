@@ -39,9 +39,9 @@ func main() {
 		log.Fatal(err)
 
 	}
-
+	ch := make(chan bool)
+	i := 0
 	str := string(urlStr)
-
 	urllines := strings.Split(string(str), "\n") // разделяем содержимое файла на строки, одна строка одна ссылка
 
 	for index, _ := range urllines {
@@ -52,16 +52,20 @@ func main() {
 		nameFile = strings.Replace(nameFile, "http", "", -1)
 		nameFile = strings.Replace(nameFile, "www", "", -1)
 		//fmt.Println("name file = ", nameFile) // просто печатем
-		go getHtml(nameFile, *resultPath, urllines, index) //вызов функции resp - ссылка ; file - наш созданный файл go-
-
-		time.Sleep(130 * time.Millisecond)
+		go getHtml(nameFile, *resultPath, urllines, index, ch) //вызов функции resp - ссылка ; file - наш созданный файл go-
+		i = index
 	}
 
+	for j := 0; j < i; j++ {
+		<-ch
+	}
+
+	time.Sleep(500 * time.Millisecond)
 	t1 := time.Now()
 	fmt.Println("Время выполнения = ", t1.Sub(t0))
 }
 
-func getHtml(name string, resultP string, urlL []string, i int) { // эта функция получает ссылку и файл
+func getHtml(name string, resultP string, urlL []string, i int, ch chan bool) { // эта функция получает ссылку и файл
 
 	fmt.Println(i, name)
 	//	time.Sleep(100 * time.Millisecond);
@@ -90,4 +94,5 @@ func getHtml(name string, resultP string, urlL []string, i int) { // эта фу
 			break
 		}
 	}
+	ch <- true
 }
